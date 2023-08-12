@@ -528,14 +528,14 @@ FT_BEGIN_HEADER
    * @fields:
    *   num_color_stops ::
    *     The number of color stops for the requested glyph index.  Set by
-   *     @FT_Get_Colorline_Stops.
+   *     @FT_Get_Paint.
    *
    *   current_color_stop ::
    *     The current color stop.  Set by @FT_Get_Colorline_Stops.
    *
    *   p ::
-   *     An opaque pointer into 'COLR' table data.  The caller must set this
-   *     to `NULL` before the first call of @FT_Get_Colorline_Stops.
+   *     An opaque pointer into 'COLR' table data.  Set by @FT_Get_Paint.
+   *     Updated by @FT_Get_Colorline_Stops.
    *
    * @since:
    *   2.11 -- **currently experimental only!**  There might be changes
@@ -592,7 +592,8 @@ FT_BEGIN_HEADER
    *
    * @fields:
    *   stop_offset ::
-   *     The stop offset between 0 and 1 along the gradient.
+   *     The stop offset along the gradient, expressed as a 16.16 fixed-point
+   *     coordinate.
    *
    *   color ::
    *     The color information for this stop, see @FT_ColorIndex.
@@ -604,7 +605,7 @@ FT_BEGIN_HEADER
    */
   typedef struct  FT_ColorStop_
   {
-    FT_F2Dot14     stop_offset;
+    FT_Fixed       stop_offset;
     FT_ColorIndex  color;
 
   } FT_ColorStop;

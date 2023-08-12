@@ -857,10 +857,10 @@
 
     p = colr->clip_list;
 
-    /* limit points to the first byte after the end of the color table.        */
-    /* Thus, in subsequent limit checks below we need to check whether the     */
-    /* read pointer is strictly greater than a position offset                 */
-    /* by certain field sizes to the left of that position.                    */
+    /* Limit points to the first byte after the end of the color table.    */
+    /* Thus, in subsequent limit checks below we need to check whether the */
+    /* read pointer is strictly greater than a position offset by certain  */
+    /* field sizes to the left of that position.                           */
     limit = (FT_Byte*)colr->table + colr->table_size;
 
     /* Check whether we can extract one `uint8` and one `uint32`. */
@@ -1054,7 +1054,7 @@
     /* Iterator points at first `ColorStop` of `ColorLine`. */
     p = iterator->p;
 
-    color_stop->stop_offset = FT_NEXT_SHORT( p );
+    color_stop->stop_offset = (FT_Fixed)FT_NEXT_SHORT( p ) << 2;
 
     color_stop->color.palette_index = FT_NEXT_USHORT( p );
 

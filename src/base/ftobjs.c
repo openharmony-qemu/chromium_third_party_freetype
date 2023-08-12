@@ -334,7 +334,7 @@
     /* if SVG table exists, allocate the space in `slot->other` */
     if ( slot->face->face_flags & FT_FACE_FLAG_SVG )
     {
-      FT_SVG_Document  document;
+      FT_SVG_Document  document = NULL;
 
 
       if ( FT_NEW( document ) )
@@ -605,7 +605,7 @@
 
 
         FT_FREE( doc->svg_document );
-        slot->internal->load_flags &= ~FT_GLYPH_OWN_GZIP_SVG;
+        slot->internal->flags &= ~FT_GLYPH_OWN_GZIP_SVG;
       }
     }
 #endif
@@ -2215,7 +2215,8 @@
     if ( FT_QALLOC( sfnt_data, rlen ) )
       return error;
     error = FT_Stream_Read( stream, (FT_Byte *)sfnt_data, (FT_ULong)rlen );
-    if ( error ) {
+    if ( error )
+    {
       FT_FREE( sfnt_data );
       goto Exit;
     }
@@ -2526,6 +2527,16 @@
     FT_UNUSED( test_mac_fonts );
 #endif
 
+
+    /* only use lower 31 bits together with sign bit */
+    if ( face_index > 0 )
+      face_index &= 0x7FFFFFFFL;
+    else
+    {
+      face_index  = -face_index;
+      face_index &= 0x7FFFFFFFL;
+      face_index  = -face_index;
+    }
 
 #ifdef FT_DEBUG_LEVEL_TRACE
     FT_TRACE3(( "FT_Open_Face: " ));
@@ -3398,6 +3409,9 @@
 
     if ( !face )
       return FT_THROW( Invalid_Face_Handle );
+
+    if ( !face->size )
+      return FT_THROW( Invalid_Size_Handle );
 
     if ( !req || req->width < 0 || req->height < 0 ||
          req->type >= FT_SIZE_REQUEST_TYPE_MAX )

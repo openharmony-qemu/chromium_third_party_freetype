@@ -29,6 +29,14 @@
 
 #include "cfferrs.h"
 
+#ifdef TT_CONFIG_OPTION_GX_VAR_SUPPORT
+#define IS_DEFAULT_INSTANCE( _face )             \
+          ( !( FT_IS_NAMED_INSTANCE( _face ) ||  \
+               FT_IS_VARIATION( _face )      ) )
+#else
+#define IS_DEFAULT_INSTANCE( _face )  1
+#endif
+
 
   /**************************************************************************
    *
@@ -67,7 +75,7 @@
 #endif /* FT_CONFIG_OPTION_INCREMENTAL */
 
     {
-      CFF_Font  cff = (CFF_Font)(face->extra.data);
+      CFF_Font  cff = (CFF_Font)( face->extra.data );
 
 
       return cff_index_access_element( &cff->charstrings_index, glyph_index,
@@ -103,7 +111,7 @@
 #endif /* FT_CONFIG_OPTION_INCREMENTAL */
 
     {
-      CFF_Font  cff = (CFF_Font)(face->extra.data);
+      CFF_Font  cff = (CFF_Font)( face->extra.data );
 
 
       cff_index_forget_element( &cff->charstrings_index, pointer );
@@ -255,8 +263,8 @@
 
 
       if ( size->strike_index != 0xFFFFFFFFUL      &&
-           sfnt->load_eblc                         &&
-           ( load_flags & FT_LOAD_NO_BITMAP ) == 0 )
+           ( load_flags & FT_LOAD_NO_BITMAP ) == 0 &&
+           IS_DEFAULT_INSTANCE( size->root.face )  )
       {
         TT_SBit_MetricsRec  metrics;
 
@@ -362,8 +370,8 @@
       SFNT_Service  sfnt;
 
 
-      if ( size->root.metrics.x_ppem < 1 ||
-           size->root.metrics.y_ppem < 1 )
+      if ( size && (size->root.metrics.x_ppem < 1 ||
+                    size->root.metrics.y_ppem < 1 ) )
       {
         error = FT_THROW( Invalid_Size_Handle );
         return error;
@@ -395,6 +403,9 @@
                            glyph_index,
                            &dummy,
                            &advanceY );
+
+        glyph->root.linearHoriAdvance = advanceX;
+        glyph->root.linearVertAdvance = advanceY;
 
         advanceX =
           (FT_UShort)FT_MulDiv( advanceX,

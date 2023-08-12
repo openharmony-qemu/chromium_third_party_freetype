@@ -84,6 +84,8 @@
 #define BBOX_STREAM         5
 #define INSTRUCTION_STREAM  6
 
+#define HAVE_OVERLAP_SIMPLE_BITMAP  0x1
+
 
   static void
   stream_close( FT_Stream  stream )
@@ -227,9 +229,9 @@
     {
       FT_TRACE6(( "Reallocating %lu to %lu.\n",
                   *dst_size, (*offset + size) ));
-      if ( FT_REALLOC( dst,
-                       (FT_ULong)( *dst_size ),
-                       (FT_ULong)( *offset + size ) ) )
+      if ( FT_QREALLOC( dst,
+                        (FT_ULong)( *dst_size ),
+                        (FT_ULong)( *offset + size ) ) )
         goto Exit;
 
       *dst_size = *offset + size;
@@ -522,6 +524,7 @@
                 const WOFF2_Point  points,
                 FT_UShort          n_contours,
                 FT_UShort          instruction_len,
+                FT_Bool            have_overlap,
                 FT_Byte*           dst,
                 FT_ULong           dst_size,
                 FT_ULong*          glyph_size )
@@ -548,6 +551,9 @@
       FT_Int   dx   = point.x - last_x;
       FT_Int   dy   = point.y - last_y;
 
+
+      if ( i == 0 && have_overlap )
+        flag |= GLYF_OVERLAP_SIMPLE;
 
       if ( dx == 0 )
         flag |= GLYF_THIS_X_IS_SAME;
@@ -778,7 +784,7 @@
       goto Fail;
 
     loca_buf_size = loca_values_size * offset_size;
-    if ( FT_QNEW_ARRAY( loca_buf, loca_buf_size ) )
+    if ( FT_QALLOC( loca_buf, loca_buf_size ) )
       goto Fail;
 
     dst = loca_buf;
@@ -833,15 +839,18 @@
 
     FT_UInt  num_substreams = 7;
 
+    FT_UShort  option_flags;
     FT_UShort  num_glyphs;
     FT_UShort  index_format;
     FT_ULong   expected_loca_length;
     FT_UInt    offset;
     FT_UInt    i;
     FT_ULong   points_size;
-    FT_ULong   bitmap_length;
     FT_ULong   glyph_buf_size;
     FT_ULong   bbox_bitmap_offset;
+    FT_ULong   bbox_bitmap_length;
+    FT_ULong   overlap_bitmap_offset = 0;
+    FT_ULong   overlap_bitmap_length = 0;
 
     const FT_ULong  glyf_start  = *out_offset;
     FT_ULong        dest_offset = *out_offset;
@@ -854,18 +863,20 @@
     WOFF2_Point  points       = NULL;
 
 
-    if ( FT_NEW_ARRAY( substreams, num_substreams ) )
+    if ( FT_QNEW_ARRAY( substreams, num_substreams ) )
       goto Fail;
 
-    if ( FT_STREAM_SKIP( 4 ) )
+    if ( FT_STREAM_SKIP( 2 ) )
+      goto Fail;
+    if ( FT_READ_USHORT( option_flags ) )
       goto Fail;
     if ( FT_READ_USHORT( num_glyphs ) )
       goto Fail;
     if ( FT_READ_USHORT( index_format ) )
       goto Fail;
 
-    FT_TRACE4(( "num_glyphs = %u; index_format = %u\n",
-                num_glyphs, index_format ));
+    FT_TRACE4(( "option_flags = %u; num_glyphs = %u; index_format = %u\n",
+                option_flags, num_glyphs, index_format ));
 
     info->num_glyphs = num_glyphs;
 
@@ -878,7 +889,7 @@
     if ( info->loca_table->dst_length != expected_loca_length )
       goto Fail;
 
-    offset = ( 2 + num_substreams ) * 4;
+    offset = 2 + 2 + 2 + 2 + ( num_substreams * 4 );
     if ( offset > info->glyf_table->TransformLength )
       goto Fail;
 
@@ -901,21 +912,36 @@
       offset += substream_size;
     }
 
-    if ( FT_NEW_ARRAY( loca_values, num_glyphs + 1 ) )
+    if ( option_flags & HAVE_OVERLAP_SIMPLE_BITMAP )
+    {
+      /* Size of overlapBitmap = floor((numGlyphs + 7) / 8) */
+      overlap_bitmap_length = ( num_glyphs + 7U ) >> 3;
+      if ( overlap_bitmap_length > info->glyf_table->TransformLength - offset )
+        goto Fail;
+
+      overlap_bitmap_offset = pos + offset;
+
+      FT_TRACE5(( "  Overlap bitmap: offset = %lu; size = %lu;\n",
+                  overlap_bitmap_offset, overlap_bitmap_length ));
+      offset += overlap_bitmap_length;
+    }
+
+    if ( FT_QNEW_ARRAY( loca_values, num_glyphs + 1 ) )
       goto Fail;
 
     points_size        = 0;
     bbox_bitmap_offset = substreams[BBOX_STREAM].offset;
 
     /* Size of bboxBitmap = 4 * floor((numGlyphs + 31) / 32) */
-    bitmap_length                   = ( ( num_glyphs + 31U ) >> 5 ) << 2;
-    substreams[BBOX_STREAM].offset += bitmap_length;
+    bbox_bitmap_length              = ( ( num_glyphs + 31U ) >> 5 ) << 2;
+    /* bboxStreamSize is the combined size of bboxBitmap and bboxStream. */
+    substreams[BBOX_STREAM].offset += bbox_bitmap_length;
 
     glyph_buf_size = WOFF2_DEFAULT_GLYPH_BUF;
-    if ( FT_NEW_ARRAY( glyph_buf, glyph_buf_size ) )
+    if ( FT_QALLOC( glyph_buf, glyph_buf_size ) )
       goto Fail;
 
-    if ( FT_NEW_ARRAY( info->x_mins, num_glyphs ) )
+    if ( FT_QNEW_ARRAY( info->x_mins, num_glyphs ) )
       goto Fail;
 
     for ( i = 0; i < num_glyphs; ++i )
@@ -947,7 +973,7 @@
         /* composite glyph */
         FT_Bool    have_instructions = FALSE;
         FT_UShort  instruction_size  = 0;
-        FT_ULong   composite_size;
+        FT_ULong   composite_size    = 0;
         FT_ULong   size_needed;
         FT_Byte*   pointer           = NULL;
 
@@ -973,7 +999,7 @@
         size_needed = 12 + composite_size + instruction_size;
         if ( glyph_buf_size < size_needed )
         {
-          if ( FT_RENEW_ARRAY( glyph_buf, glyph_buf_size, size_needed ) )
+          if ( FT_QREALLOC( glyph_buf, glyph_buf_size, size_needed ) )
             goto Fail;
           glyph_buf_size = size_needed;
         }
@@ -1025,8 +1051,11 @@
         FT_ULong   flag_size;
         FT_ULong   triplet_size;
         FT_ULong   triplet_bytes_used;
-        FT_Byte*   flags_buf   = NULL;
-        FT_Byte*   triplet_buf = NULL;
+        FT_Bool    have_overlap  = FALSE;
+        FT_Byte    overlap_bitmap;
+        FT_ULong   overlap_offset;
+        FT_Byte*   flags_buf     = NULL;
+        FT_Byte*   triplet_buf   = NULL;
         FT_UShort  instruction_size;
         FT_ULong   size_needed;
         FT_Int     end_point;
@@ -1035,7 +1064,18 @@
         FT_Byte*   pointer = NULL;
 
 
-        if ( FT_NEW_ARRAY( n_points_arr, n_contours ) )
+        /* Set `have_overlap`. */
+        if ( overlap_bitmap_offset )
+        {
+          overlap_offset = overlap_bitmap_offset + ( i >> 3 );
+          if ( FT_STREAM_SEEK( overlap_offset ) ||
+               FT_READ_BYTE( overlap_bitmap )   )
+            goto Fail;
+          if ( overlap_bitmap & ( 0x80 >> ( i & 7 ) ) )
+            have_overlap = TRUE;
+        }
+
+        if ( FT_QNEW_ARRAY( n_points_arr, n_contours ) )
           goto Fail;
 
         if ( FT_STREAM_SEEK( substreams[N_POINTS_STREAM].offset ) )
@@ -1072,7 +1112,7 @@
 
         /* Create array to store point information. */
         points_size = total_n_points;
-        if ( FT_NEW_ARRAY( points, points_size ) )
+        if ( FT_QNEW_ARRAY( points, points_size ) )
           goto Fail;
 
         if ( triplet_decode( flags_buf,
@@ -1101,7 +1141,7 @@
                       instruction_size;
         if ( glyph_buf_size < size_needed )
         {
-          if ( FT_RENEW_ARRAY( glyph_buf, glyph_buf_size, size_needed ) )
+          if ( FT_QREALLOC( glyph_buf, glyph_buf_size, size_needed ) )
             goto Fail;
           glyph_buf_size = size_needed;
         }
@@ -1155,6 +1195,7 @@
                            points,
                            n_contours,
                            instruction_size,
+                           have_overlap,
                            glyph_buf,
                            glyph_buf_size,
                            &glyph_size ) )
@@ -1185,8 +1226,7 @@
       *glyf_checksum += compute_ULong_sum( glyph_buf, glyph_size );
 
       /* Store x_mins, may be required to reconstruct `hmtx'. */
-      if ( n_contours > 0 )
-        info->x_mins[i] = (FT_Short)x_min;
+      info->x_mins[i] = (FT_Short)x_min;
     }
 
     info->glyf_table->dst_length = dest_offset - info->glyf_table->dst_offset;
@@ -1303,7 +1343,7 @@
     offset_size = index_format ? 4 : 2;
 
     /* Create `x_mins' array. */
-    if ( FT_NEW_ARRAY( info->x_mins, num_glyphs ) )
+    if ( FT_QNEW_ARRAY( info->x_mins, num_glyphs ) )
       return error;
 
     loca_offset = info->loca_table->src_offset;
@@ -1391,8 +1431,8 @@
     if ( num_hmetrics < 1 )
       goto Fail;
 
-    if ( FT_NEW_ARRAY( advance_widths, num_hmetrics ) ||
-         FT_NEW_ARRAY( lsbs, num_glyphs )             )
+    if ( FT_QNEW_ARRAY( advance_widths, num_hmetrics ) ||
+         FT_QNEW_ARRAY( lsbs, num_glyphs )             )
       goto Fail;
 
     /* Read `advanceWidth' stream.  Always present. */
@@ -1443,7 +1483,7 @@
 
     /* Build the hmtx table. */
     hmtx_table_size = 2 * num_hmetrics + 2 * num_glyphs;
-    if ( FT_NEW_ARRAY( hmtx_table, hmtx_table_size ) )
+    if ( FT_QALLOC( hmtx_table, hmtx_table_size ) )
       goto Fail;
 
     dst = hmtx_table;
@@ -1500,10 +1540,10 @@
   {
     /* Memory management of `transformed_buf' is handled by the caller. */
 
-    FT_Error   error       = FT_Err_Ok;
-    FT_Stream  stream      = NULL;
-    FT_Byte*   buf_cursor  = NULL;
-    FT_Byte*   table_entry = NULL;
+    FT_Error   error      = FT_Err_Ok;
+    FT_Stream  stream     = NULL;
+    FT_Byte*   buf_cursor = NULL;
+    FT_Byte    table_entry[16];
 
     /* We are reallocating memory for `sfnt', so its pointer may change. */
     FT_Byte*   sfnt = *sfnt_bytes;
@@ -1543,10 +1583,6 @@
         return FT_THROW( Invalid_Table );
       }
     }
-
-    /* Create buffer for table entries. */
-    if ( FT_NEW_ARRAY( table_entry, 16 ) )
-      goto Fail;
 
     /* Create a stream for the uncompressed buffer. */
     if ( FT_NEW( stream ) )
@@ -1710,7 +1746,6 @@
     /* Set pointer of sfnt stream to its correct value. */
     *sfnt_bytes = sfnt;
 
-    FT_FREE( table_entry );
     FT_Stream_Close( stream );
     FT_FREE( stream );
 
@@ -1723,7 +1758,6 @@
     /* Set pointer of sfnt stream to its correct value. */
     *sfnt_bytes = sfnt;
 
-    FT_FREE( table_entry );
     FT_Stream_Close( stream );
     FT_FREE( stream );
 
@@ -1836,8 +1870,8 @@
     woff2.ttc_fonts = NULL;
 
     /* Read table directory. */
-    if ( FT_NEW_ARRAY( tables, woff2.num_tables )  ||
-         FT_NEW_ARRAY( indices, woff2.num_tables ) )
+    if ( FT_QNEW_ARRAY( tables, woff2.num_tables )  ||
+         FT_QNEW_ARRAY( indices, woff2.num_tables ) )
       goto Exit;
 
     FT_TRACE2(( "\n" ));
@@ -1908,10 +1942,11 @@
         goto Exit;
       }
 
+      table->flags      = flags;
       table->src_offset = src_offset;
       table->src_length = table->TransformLength;
       src_offset       += table->TransformLength;
-      table->flags      = flags;
+      table->dst_offset = 0;
 
       FT_TRACE2(( "  %c%c%c%c  %08d  %08d   %08ld    %08ld    %08ld\n",
                   (FT_Char)( table->Tag >> 24 ),
@@ -1969,6 +2004,7 @@
 
       FT_TRACE4(( "Number of fonts in TTC: %d\n", woff2.num_fonts ));
 
+      /* pre-zero pointers within in case of failure */
       if ( FT_NEW_ARRAY( woff2.ttc_fonts, woff2.num_fonts ) )
         goto Exit;
 
@@ -1982,7 +2018,7 @@
         if ( FT_READ_ULONG( ttc_font->flavor ) )
           goto Exit;
 
-        if ( FT_NEW_ARRAY( ttc_font->table_indices, ttc_font->num_tables ) )
+        if ( FT_QNEW_ARRAY( ttc_font->table_indices, ttc_font->num_tables ) )
           goto Exit;
 
         FT_TRACE5(( "Number of tables in font %d: %d\n",
@@ -2063,7 +2099,7 @@
         error = FT_THROW( Invalid_Table );
         goto Exit;
       }
-      file_offset = ROUND4(woff2.metaOffset + woff2.metaLength);
+      file_offset = ROUND4( woff2.metaOffset + woff2.metaLength );
     }
 
     if ( woff2.privOffset )
@@ -2073,7 +2109,7 @@
         error = FT_THROW( Invalid_Table );
         goto Exit;
       }
-      file_offset = ROUND4(woff2.privOffset + woff2.privLength);
+      file_offset = ROUND4( woff2.privOffset + woff2.privLength );
     }
 
     if ( file_offset != ( ROUND4( woff2.length ) ) )
@@ -2085,7 +2121,7 @@
     /* Validate requested face index. */
     *num_faces = woff2.num_fonts;
     /* value -(N+1) requests information on index N */
-    if ( *face_instance_index < 0 )
+    if ( *face_instance_index < 0 && face_index > 0 )
       face_index--;
 
     if ( face_index >= woff2.num_fonts )
@@ -2261,9 +2297,9 @@
     {
       FT_TRACE5(( "Trimming sfnt stream from %lu to %lu.\n",
                   sfnt_size, woff2.actual_sfnt_size ));
-      if ( FT_REALLOC( sfnt,
-                       (FT_ULong)( sfnt_size ),
-                       (FT_ULong)( woff2.actual_sfnt_size ) ) )
+      if ( FT_QREALLOC( sfnt,
+                        (FT_ULong)( sfnt_size ),
+                        (FT_ULong)( woff2.actual_sfnt_size ) ) )
         goto Exit;
     }
 
