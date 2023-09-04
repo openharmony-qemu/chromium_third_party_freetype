@@ -80,19 +80,6 @@ used to filter file path.
                  <policyitem type="compatibility" name="Mark Adler6" path="src.*" desc="" />
                  <policyitem type="compatibility" name="Mark Adler7" path="src.*" desc="" />
                  <policyitem type="compatibility" name="Mark Adler8" path="src.*" desc="" />
-                <!-- <policyitem type="compatibility" name="Khronos License" path=".*" desc="" />
-                <policyitem type="compatibility" name="Apache-2.0" path=".*" desc="" />
-                <policyitem type="compatibility" name="GPLStyleLicense" path=".*" desc="" />
-                <policyitem type="compatibility" name="LLVM License" path="third_party/llvm-subzero.*" desc="" />
-                <policyitem type="compatibility" name="LLVM License" path="third_party/subzero.*" desc="" />
-                <policyitem type="compatibility" name="LLVM License" path="third_party/llvm-10.0.*" desc="" />
-                <policyitem type="compatibility" name="GPL-3.0+" path=".*" desc="" />
-                <policyitem type="compatibility" name="Spencer-94" path=".*" desc="" />
-                <policyitem type="compatibility" name="OpenBSD" path=".*" desc="" />
-                <policyitem type="compatibility" name="original license" path="third_party/llvm-subzero/include/llvm/Support.*" desc="" />
-                <policyitem type="compatibility" name="original license" path="third_party/llvm-10.0/llvm/include/llvm/Support.*" desc="" />
-                <policyitem type="compatibility" name="Khronos License2" path="include.*" desc="" />
-                <policyitem type="compatibility" name="Khronos License3" path="include.*" desc="" /> -->
             </policy>
         </policylist>
         <filefilterlist>
@@ -133,101 +120,61 @@ used to filter file path.
             </filefilter> 
         </filefilterlist>
         <licensematcherlist>
-            <!-- <licensematcher name="LLVM License" desc="">
-                <licensetext name="
-                /* This file is distributed under the University of Illinois Open Source      */
-                /* License. See LICENSE.TXT for details.                                      */
-                " desc="" />
-                </licensematcher>
-            <licensematcher name="OpenBSD" desc="">
-                <licensetext name="
-                * This code is derived from OpenBSD's libc, original license follows:
-                *
-                * Copyright (c) 1998 Todd C. Miller &gt;Todd.Miller@courtesan.com&gt;
-            " desc="" />
-            </licensematcher>
-            <licensematcher name="original license" desc="">
-                <licensetext name="
-                * This is an OpenSSL-compatible implementation of the RSA Data Security, Inc.
-                * MD5 Message-Digest Algorithm (RFC 1321).
-            " desc="" />
-            </licensematcher>
-            <licensematcher name="Khronos License2" desc="">
-                <licensetext name="
-                * Copyright (c) 2008-2018 The Khronos Group Inc.
-            " desc="" />
-            </licensematcher>
-            <licensematcher name="Khronos License3" desc="">
-                <licensetext name="
-                * Copyright (c) 2007-2016 The Khronos Group Inc
-            " desc="" />
-            </licensematcher> -->
             <licensematcher name="Mark Adler" desc="">
                 <licensetext name="
                  * Copyright (C) 1995-2022 Mark Adler
             " desc="" />
             </licensematcher> 
-
             <licensematcher name="Mark Adler1" desc="">
                 <licensetext name="
                  * Copyright (C) 1995-2003, 2010 Mark Adler
             " desc="" />
             </licensematcher> 
-
             <licensematcher name="RSA Data Security" desc="">
                 <licensetext name="
                  * This is an OpenSSL-compatible implementation of the RSA Data Security, Inc.
             " desc="" />
             </licensematcher>
-
             <licensematcher name="Mark Adler2" desc="">
                 <licensetext name="
                   * Copyright (C) 1995-2011, 2016 Mark Adler
             " desc="" />
             </licensematcher> 
-
             <licensematcher name="Mark Adler3" desc="">
                 <licensetext name="
                   * Copyright (C) 1995-2005, 2010 Mark Adler
             " desc="" />
             </licensematcher> 
-
             <licensematcher name="Mark Adler4" desc="">
                 <licensetext name="
                    * Copyright (C) 1995-2019 Mark Adler
             " desc="" />
             </licensematcher>  
-
             <licensematcher name="Jean-loup Gailly" desc="">
                 <licensetext name="
                    * Copyright (C) 1995-2017 Jean-loup Gailly
             " desc="" />
             </licensematcher> 
-
             <licensematcher name="Mark Adler5" desc="">
                 <licensetext name="
                    * Copyright (C) 1995-2017 Mark Adler
             " desc="" />
             </licensematcher>  
-
             <licensematcher name="Mark Adler6" desc="">
                 <licensetext name="
                   * Copyright (C) 1995-2016 Jean-loup Gailly, Mark Adler
             " desc="" />
             </licensematcher>  * Copyright (C) 1995-2022 Jean-loup Gailly, Mark Adler
-
             <licensematcher name="Mark Adler7" desc="">
                 <licensetext name="
                   * Copyright (C) 1995-2022 Jean-loup Gailly, Mark Adler
             " desc="" />
             </licensematcher> 
-
             <licensematcher name="Mark Adler8" desc="">
                 <licensetext name="
                  * Copyright (C) 2004-2019 Mark Adle
             " desc="" />
             </licensematcher>
-
         </licensematcherlist>
     </oatconfig>
 </configuration>
