@@ -1,7 +1,63 @@
 [
     {
         "Name": "chromium_third_party_freetype",                   # 上游开源软件名全称
-        "License": "FTL"  ,"GPL-2.0+","GPLStyleLicense","XConsortiumLicense" ,"GPL-3.0-or-later" ,"zlib-acknowledgement","Public Domain","iMatix",      # 上游开源软件中包含的许可证信息
+        "License": "FTL"      # 上游开源软件中包含的许可证信息
+        "License File": "LICENSE.TXT",    # 许可证所在文件路径
+        "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",   # 上游软件包发布地址
+        "Description": "FreeType字体库"           # 开源软件功能描述
+    },
+    {
+        "Name": "chromium_third_party_freetype",                   # 上游开源软件名全称
+        "License": "GPL-2.0+"      # 上游开源软件中包含的许可证信息
+        "License File": "LICENSE.TXT",    # 许可证所在文件路径
+        "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",   # 上游软件包发布地址
+        "Description": "FreeType字体库"           # 开源软件功能描述
+    },
+    {
+        "Name": "chromium_third_party_freetype",                   # 上游开源软件名全称
+        "License": "GPLStyleLicense"      # 上游开源软件中包含的许可证信息
+        "License File": "LICENSE.TXT",    # 许可证所在文件路径
+        "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",   # 上游软件包发布地址
+        "Description": "FreeType字体库"           # 开源软件功能描述
+    },
+    {
+        "Name": "chromium_third_party_freetype",                   # 上游开源软件名全称
+        "License":"XConsortiumLicense"     # 上游开源软件中包含的许可证信息
+        "License File": "LICENSE.TXT",    # 许可证所在文件路径
+        "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",   # 上游软件包发布地址
+        "Description": "FreeType字体库"           # 开源软件功能描述
+    },
+    {
+        "Name": "chromium_third_party_freetype",                   # 上游开源软件名全称
+        "License": "GPL-3.0-or-later"     # 上游开源软件中包含的许可证信息
+        "License File": "LICENSE.TXT",    # 许可证所在文件路径
+        "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",   # 上游软件包发布地址
+        "Description": "FreeType字体库"           # 开源软件功能描述
+    },
+    {
+        "Name": "chromium_third_party_freetype",                   # 上游开源软件名全称
+        "License": "zlib-acknowledgement"      # 上游开源软件中包含的许可证信息
+        "License File": "LICENSE.TXT",    # 许可证所在文件路径
+        "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",   # 上游软件包发布地址
+        "Description": "FreeType字体库"           # 开源软件功能描述
+    },
+    {
+        "Name": "chromium_third_party_freetype",                   # 上游开源软件名全称
+        "License": "Public Domain"     # 上游开源软件中包含的许可证信息
+        "License File": "LICENSE.TXT",    # 许可证所在文件路径
+        "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",   # 上游软件包发布地址
+        "Description": "FreeType字体库"           # 开源软件功能描述
+    },
+    {
+        "Name": "chromium_third_party_freetype",                   # 上游开源软件名全称
+        "License":"iMatix"      # 上游开源软件中包含的许可证信息
         "License File": "LICENSE.TXT",    # 许可证所在文件路径
         "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
         "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",   # 上游软件包发布地址
