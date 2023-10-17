@@ -78,7 +78,6 @@ used to filter file path.
                 <policyitem type="compatibility" name="GPL-2.0+" path="builds/unix/pkg.m4" desc="经法务确认,涉及文件在render下进行了隔离" />
                 <policyitem type="compatibility" name="GPLStyleLicense" path="docs/GPLv2.TXT" desc="经法务确认,涉及文件在render下进行了隔离" />         
                 <policyitem type="compatibility" name="GPLStyleLicense" path="LICENSE.TXT" desc="经法务确认,涉及文件在render下进行了隔离" />
-                <policyitem type="compatibility" name="GPL-3.0-or-later" path="builds/unix/ax_pthread.m4" desc="经法务确认,涉及文件在render下进行了隔离" />
             </policy>
         </policylist>
         <filefilterlist>
@@ -99,7 +98,7 @@ used to filter file path.
             <filefilter name="readmeOpenSourcefileNamePolicFilter">
                 <filteritem type="filepath" name="README.OpenSource" desc="Filter readme.opensource files" />
             </filefilter>
-            <filefilter name="defaultFilter">
+            <filefilter name="binaryFileTypePolicyFilter" desc="Check to see if it is a binary file">
                 <filteritem type="filepath" name="builds/amiga/smakefile"  desc="chromium原生二进制文件,不会使用" />
                 <filteritem type="filepath" name=".mailmap" desc="chromium原生二进制文件,不会使用" />
                 <filteritem type="filepath" name="builds/vms/vmslib.dat"  desc="chromium原生二进制文件,不会使用" />
@@ -107,7 +106,11 @@ used to filter file path.
                 <filteritem type="filepath" name="docs/markdown/images/favico.ico" desc="chromium原生二进制文件,不会使用" />
                 <filteritem type="filepath" name="src/autofit/afblue.dat" desc="chromium原生二进制文件,不会使用" />
                 <filteritem type="filepath" name="builds/amiga/makefile.os4" desc="chromium原生二进制文件,不会使用" />  
-            </filefilter> 
+                <filteritem type="filepath" name="builds/amiga/smakefile" desc="chromium原生二进制文件,不会使用" />
+            </filefilter>
+            <filefilter name="defaultFilter" desc="File is not used">
+                <filteritem type="filepath" name="builds/unix/ax_pthread.m4" desc="GPL-3.0-or-later禁止使用" />
+            </filefilter>
         </filefilterlist>
         <licensematcherlist>
             <licensematcher name="iMatix" desc="">
