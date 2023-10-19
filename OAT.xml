@@ -105,11 +105,11 @@ used to filter file path.
                 <filteritem type="filepath" name="builds/amiga/README" desc="chromium原生二进制文件,不会使用" />
                 <filteritem type="filepath" name="docs/markdown/images/favico.ico" desc="chromium原生二进制文件,不会使用" />
                 <filteritem type="filepath" name="src/autofit/afblue.dat" desc="chromium原生二进制文件,不会使用" />
-                <filteritem type="filepath" name="builds/amiga/makefile.os4" desc="chromium原生二进制文件,不会使用" />  
+                <filteritem type="filepath" name="builds/amiga/makefile.os4" desc="chromium原生二进制文件,不会使用" />
                 <filteritem type="filepath" name="builds/amiga/smakefile" desc="chromium原生二进制文件,不会使用" />
             </filefilter>
             <filefilter name="defaultFilter" desc="File is not used">
-                <filteritem type="filepath" name="builds/unix/ax_pthread.m4" desc="GPL-3.0-or-later禁止使用" />
+                <filteritem type="filepath" name="builds/unix/ax_pthread.m4" desc="该文件涉及GPL-3.0-or-later,经确认不会使用" />
             </filefilter>
         </filefilterlist>
         <licensematcherlist>
