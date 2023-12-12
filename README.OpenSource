@@ -1,0 +1,11 @@
+[
+    {
+        "Name": "freetype2",
+        "License": "BSD-3-Clause",
+        "License File": "LICENSE.TXT",
+        "Version Number": "034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Owner": "huangjiewen2@huawei.com",
+        "Upstream URL": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git@034e5dbf92ea3a7ea7c9322e47a3a50ff23f7b55",
+        "Description": "FreeType字体库"
+    }
+]
