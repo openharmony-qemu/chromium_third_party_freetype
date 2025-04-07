@@ -4,7 +4,7 @@
  *
  *   SFNT object management (base).
  *
- * Copyright (C) 1996-2023 by
+ * Copyright (C) 1996-2024 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -38,6 +38,10 @@
 
 #ifdef TT_CONFIG_OPTION_BDF
 #include "ttbdf.h"
+#endif
+
+#ifdef TT_CONFIG_OPTION_GPOS_KERNING
+#include "ttgpos.h"
 #endif
 
 
@@ -698,6 +702,9 @@
           instance_offset += instance_size;
         }
 
+        /* named instance indices start with value 1 */
+        face->var_default_named_instance = i + 1;
+
         if ( i == num_instances )
         {
           /* no default instance in named instance table; */
@@ -1023,6 +1030,10 @@
     LOAD_( gasp );
     LOAD_( kern );
 
+#ifdef TT_CONFIG_OPTION_GPOS_KERNING
+    LOAD_( gpos );
+#endif
+
     face->root.num_glyphs = face->max_profile.numGlyphs;
 
     /* Bit 8 of the `fsSelection' field in the `OS/2' table denotes  */
@@ -1059,6 +1070,16 @@
       if ( !face->root.style_name )
         GET_NAME( FONT_SUBFAMILY, &face->root.style_name );
     }
+
+#ifdef TT_CONFIG_OPTION_GX_VAR_SUPPORT
+    {
+      FT_Memory  memory = face->root.memory;
+
+
+      if ( FT_STRDUP( face->non_var_style_name, face->root.style_name ) )
+        goto Exit;
+    }
+#endif
 
     /* now set up root fields */
     {
@@ -1106,7 +1127,11 @@
         flags |= FT_FACE_FLAG_VERTICAL;
 
       /* kerning available ? */
-      if ( TT_FACE_HAS_KERNING( face ) )
+      if ( TT_FACE_HAS_KERNING( face )
+#ifdef TT_CONFIG_OPTION_GPOS_KERNING
+           || face->gpos_kerning_available
+#endif
+         )
         flags |= FT_FACE_FLAG_KERNING;
 
 #ifdef TT_CONFIG_OPTION_GX_VAR_SUPPORT
@@ -1457,6 +1482,11 @@
     /* freeing the kerning table */
     tt_face_done_kern( face );
 
+#ifdef TT_CONFIG_OPTION_GPOS_KERNING
+    /* freeing the GPOS table */
+    tt_face_done_gpos( face );
+#endif
+
     /* freeing the collection table */
     FT_FREE( face->ttc_header.offsets );
     face->ttc_header.count = 0;
@@ -1506,6 +1536,7 @@
 
 #ifdef TT_CONFIG_OPTION_GX_VAR_SUPPORT
     FT_FREE( face->var_postscript_prefix );
+    FT_FREE( face->non_var_style_name );
 #endif
 
     /* freeing glyph color palette data */
