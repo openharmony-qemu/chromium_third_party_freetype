@@ -423,6 +423,25 @@
 
 #endif /* FT_CONFIG_OPTION_SVG */
 
+    /* top-level code ensures that FT_LOAD_NO_HINTING is set */
+    /* if FT_LOAD_NO_SCALE is active                         */
+    hinting = FT_BOOL( ( load_flags & FT_LOAD_NO_HINTING ) == 0 );
+    scaled  = FT_BOOL( ( load_flags & FT_LOAD_NO_SCALE   ) == 0 );
+
+    glyph->hint        = hinting;
+    glyph->scaled      = scaled;
+
+    if ( scaled )
+    {
+      glyph->x_scale = size->root.metrics.x_scale;
+      glyph->y_scale = size->root.metrics.y_scale;
+    }
+    else
+    {
+      glyph->x_scale = 0x10000L;
+      glyph->y_scale = 0x10000L;
+    }
+
     /* if we have a CID subfont, use its matrix (which has already */
     /* been multiplied with the root matrix)                       */
 
@@ -460,13 +479,6 @@
     glyph->root.outline.n_points   = 0;
     glyph->root.outline.n_contours = 0;
 
-    /* top-level code ensures that FT_LOAD_NO_HINTING is set */
-    /* if FT_LOAD_NO_SCALE is active                         */
-    hinting = FT_BOOL( ( load_flags & FT_LOAD_NO_HINTING ) == 0 );
-    scaled  = FT_BOOL( ( load_flags & FT_LOAD_NO_SCALE   ) == 0 );
-
-    glyph->hint        = hinting;
-    glyph->scaled      = scaled;
     glyph->root.format = FT_GLYPH_FORMAT_OUTLINE;  /* by default */
 
     {
@@ -707,7 +719,7 @@
           metrics->vertAdvance += font_offset.y;
         }
 
-        if ( ( load_flags & FT_LOAD_NO_SCALE ) == 0 || force_scaling )
+        if ( scaled || force_scaling )
         {
           /* scale the outline and the metrics */
           FT_Int       n;
